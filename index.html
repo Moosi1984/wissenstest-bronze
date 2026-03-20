@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Wissenstest Bronze</title>
+
+<style>
+body {
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont;
+    background:#f2f2f2;
+    color:#333;
+}
+
+.app { 
+    max-width:500px; 
+    margin:auto; 
+    padding:20px;
+}
+
+.header {
+    text-align:center;
+    font-size:26px;
+    font-weight:700;
+    margin-bottom:10px;
+    color:#d40000;
+}
+
+.score {
+    text-align:center;
+    margin-bottom:15px;
+    font-size:18px;
+}
+
+.card {
+    background:white;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+    animation:fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); } }
+
+.button {
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    background:#d40000;
+    color:white;
+    transition:0.2s;
+}
+
+.button:active { transform:scale(0.96); }
+
+.small-btn { 
+    background:#333;
+}
+
+.answer {
+    padding:14px;
+    margin:8px 0;
+    border-radius:12px;
+    background:#f2f2f2;
+    transition:0.2s;
+    border:2px solid transparent;
+}
+
+.answer:active { transform:scale(0.97); }
+
+.answer.selected { 
+    border:2px solid #d40000;
+    background:#ffe5e5;
+}
+
+.correct { 
+    background:#2ecc71 !important; 
+    color:white;
+}
+
+.wrong { 
+    background:#e74c3c !important; 
+    color:white;
+    animation: shake 0.4s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+    100% { transform: translateX(0); }
+}
+
+.progress {
+    height:8px;
+    background:#ddd;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+.progress-bar {
+    height:8px;
+    background:#d40000;
+    border-radius:10px;
+    transition:width 0.4s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<div class="header">🚒 Wissenstest Bronze</div> <div class="score" id="score">🏆 Punkte: 0 / 0</div> <div id="app"></div> </div>
+
+<script>
+
+// 🔥 ALLE FRAGEN KOMPLETT
+const alleFragen = [
+
+{frage:"Wer ist für die Führung der Ortsfeuerwehr verantwortlich?", antworten:["Der Bürgermeister","Der Abschnittskommandant/din","Der Bezirkskommandant/din","Der Ortskommandant/din"], richtig:[3]},
+
+{frage:"Nenne 3 konkrete Aufgaben/ Einsätze zu den deine Feuerwehr herangezogen werden kann?", antworten:["Brand, Verkehrsunfall, Winterdienst","Brand, Unwettereinsatz, Verkehrsunfall","Forstarbeiten, Brand, Verkehrsunfall","Brand, Verkehrsunfall, Hausmeisterservice"], richtig:[1]},
+
+{frage:"Woraus besteht die Einsatzbekeidung?", antworten:["Einsatzhandschuhe, Feuerwehr- Sicherheitsstiefel, Einsatzjacke","Warnüberwurf, Bergschuhe, Einsatzjacke","Einsatzhose, Schutzjacke, Feuerwehrhelm","Feuerwehrhelm, Schutzjacke, Engelbert Stauss Hose"], richtig:[0,2]},
+
+{frage:"Warum muss jede Einsatzbekleidung nach jedem Einstatz gereinigt werden?", antworten:["Muss nicht! Rauchgeruch zeigt, dass du bereits Einsatzerfahrung hast","Zum Entfernen von Schadstoffen, die sich beim Einsatz festsetzen","Um Spind sauber zu halten und die Lebensdauer zu verlängern","Eine dreckige Uniform sieht doch cool aus"], richtig:[1]},
+
+{frage:"Welche Bekleidung gehört zusätzlich zu der Einsatzbekleidung, wenn man mit der Motorsäge arbeitet?", antworten:["Man braucht keine es genügt die Einsatzbekleidung","Englbert Stauss Hose","Schnittschutzhose","Motorsägen Hose"], richtig:[2]},
+
+{frage:"Welche Feuerwehrfahrzeuge sind besonders für der Löscheinsatz geeignet?",
+antworten:["Rüstlöschfahrzeuge","Tanklöschfahrzeuge","Klein- und Löschfahrzeuge","Sonderfahrzeuge"],
+richtig:[1,2]},
+
+{frage:"Was bedeutet die Abkürzung KLF-A?", antworten:["Klein-Löschfahrzeug mit Atemschutz","Klein- Löschfahrzeug mit Allem Ausgestattet","Klein- Löschfahrzeug mit Anhängekupplung","Klein- Löschfahrzeug mit Allradantrieb"], richtig:[3]},
+
+{frage:"Worauf ist bei der Lagerung von Geräten im Fahrzeug zu achten?", antworten:["Das die Geräte nur in der dafür vorgesehenen Halterung gelagert wird","Das die Bedienungsanleitung unmittelbar greifbar ist","Das die Ladungssicherung geschlossen ist","Ist eh egal, das macht der Gerätewart"], richtig:[0,2]},
+
+{frage:"Welche Notrufnummer gehen zur Leitstelle Tirol?", antworten:["133","112","144","122"],
+richtig:[2,3]},
+
+{frage:"Durch welche 2 offiziellen Alarmierungsmittel wird die Feuerwehr alarmiert?", antworten:["Pager","Whats App","SMS","Sirene"], richtig:[0,3]},
+
+{frage:"Welche Arten von Funkgespräche werden im Feuerwehrfunk durchgegeben?", antworten:["Meldung, Antwort, Frage","Meldung, Sprichwort, Frage","Meldung, Befehl, Frage","Meldung, Mitteilung, Frage"], richtig:[2]},
+
+{frage:"Wie heißt die Funk Fixstation im Feuerwehrhaus?", antworten:["Anton","Friedrich","Florian","Es ist immer euer Nachname"], richtig:[2]},
+
+{frage:"Welche Grundregel ist beim Beginn des Funkgespräches zu beachten?", antworten:["Denken, Atmen, Schlucken, Sprechen","Denken, Atmen, Drücken, Sprechen","Denken, Drücken, Schlucken, Sprechen","Denken, Drücken, Atmen, Sprechen"], richtig:[2]},
+
+{frage:"Wie ist die Tonfolge des Sirenensignal für 'Zivilschutz Warnung'?",
+antworten:["1 Minute gleichbleibender Dauerton","2 Minuten gleichbleibender Dauerton","3 Minuten gleichbleibender Dauerton","1 Minute auf und abschwellender Ton"], richtig:[2]},
+
+{frage:"Welche Wasserentnahmestellen für Löschwasser kennst du?", antworten:["Mobile Löschwasserentnahmestellen","Bach, Teich = unabhängige Wasserentnahmestellen","Hydranten = abhängige Wasserentnahmestellen","selbst Versorger Wasserentnahmestellen"], richtig:[1,2]},
+
+{frage:"Was muss du mit einem Hydranten vor Inbetriebnahme machen?", antworten:["Den Absperrschieber öffnen","Die Anwohner warnen, dass Wasser rostig sein kann","Den Hydrant Spülen","Den Hydranten befühlen"], richtig:[2]},
+
+{frage:"Warum müssen Hydranten gespült werden?", antworten:["Um Verunreinigungen (z.B. Rost, Schmutzablagerungen,) auszuspülen","Damit die Luft entweichen kann","Damit Gebäude vor einem zu hohen Wasserdruck geschützt werden","Damit schneller Wasser kommt"], richtig:[0]},
+
+{frage:"Welche Arten von Hydranten gibt es?", antworten:["Kaltwasserhydranten","Überflurhydranten","Unterflurhydranten","Trinkwasserhydranten"],
+richtig:[1,2]},
+
+{frage:"Welche genormte Länge hat ein B – Schlauch?",
+antworten:["10 Meter","15 Meter","20 Meter","25 Meter"], richtig:[2]},
+
+{frage:"Welchem Zweck dient ein Hydrantenschlüssel?", antworten:["Zum Öffnen der Blindkupplung am Hydranten","Zum Öffnen des Absperrschieber","Zum fest ziehen des angeschlossenen Schlauches","Zum Öffnen des Hydranten"], richtig:[0,3]},
+
+{frage:"Welchen Zweck dient der ABC - Kupplungsschlüssel?", antworten:["Zum Öffnen der Blindkupplung am Ausgang des Hydranten","Zum Vollständigen Schließen von A, B, C – Kupplungen","Zum Öffnen von festgezogenen / festsitzenden Kupplungen","Zum Gewaltasamen Auskuppeln der Einbaupumpe bei tech. Problemen"], richtig:[1]},
+
+{frage:"Wozu dient der Schlauchhalter?", antworten:["Um Kupplungen bzw. Schläuche zu entlasten","Um Schläuche zu halten","Um Kupplungen bzw. Schläuche zu befestigen","Um den Schlauch zu tragen"], richtig:[0,2]},
+
+{frage:"Welche Arten von Schläuchen werden in der Feuerwehr verwendet?", antworten:["Niederdruckschläuche","Druckschläuche","Saugschläuche","Vakumschläuche"],
+richtig:[1,2]},
+
+{frage:"Welche Aufgaben hat der Saugkopf?", antworten:["Beschweren, dass die Saugleitung zum Grund hin absinkt","Verhindert das Eindringen von Verunreinigungen in den Schlauch","Ermöglicht das schneller aussaugen","Hält die Wassersäule im Saugschlauch bei 'Wasser halt'"], richtig:[1,3]},
+
+{frage:"Welchen unterschied gibt es zwischen Saug – und Druckschläuchen?", antworten:["Saugschläuche haben eine Saug- u. Drucklippe u. sind formbeständig","Druckschläuche haben eine Saug- u. Drucklippe u. sind formbeständig","Druckschläuche haben nur eine Drucklippe u. sind flexibel","Saugschläuche haben nur eine Drucklippe u. sind flexibel"], richtig:[0,2]},
+
+{frage:"Welche Voraussetzung braucht eine Verbrennung?", antworten:["Brennstoff, Sauerstoff","Kohlendioxid, Temperatur (Energie)","Temperatur (Energie) richtiges Mischungsverhältnis","Brennstoff, Kohlenmonoxid"], richtig:[0,2]},
+
+{frage:"Welche Brandklassen gibt es?",
+antworten:["A, B, C, D, E, F","A, B, C, D","A, B, C, D, F","A, B, C"], richtig:[2]},
+
+{frage:"Was bedeutet die Brandklasse F?", antworten:["Brennbare Flüssigkeiten","Brennbare Gase","Brennbare Speiseöle und Fette","Für Fahrzeuge geeignet"], richtig:[2]},
+
+{frage:"Was heißt Löschen?",
+antworten:["Den Kohlendioxid entnehmen","Die Voraussetzung für einen Brand ändern (Energie, Brennstoff, Sauerstoffentzug ändern des Mischungsverhältnisses)","Das Kohlenmonoxid entnehmen","Einfach nur Wasser drauf spritzen"], richtig:[1]},
+
+{frage:"Welche 2 Arten von Leinen werden in der Feuerwehr hauptsächlich verwendet?", antworten:["Die Rettungs- und Arbeitsleine","Die Ventil- und Bindeleine","Die Sicherungs- und Bergeleine","Die Abseil- und Bergeleine"], richtig:[0]},
+
+{frage:"Wie erkenne ich eine Rettungsleine?", antworten:["Sicherheitskarabiner nicht farblich markiert und Typenschild","Oranger Beutel","Spezialmarkierung am Ende des Seils","Blauer Beutel und Sicherheitskarabiner farblich markiert"], richtig:[0,1]},
+
+{frage:"Nenne 3 Kleinlöschgeräte?",
+antworten:["Kübelspritz, Feuerfächer","Feuerlöscher, Feuerpatsche","Kübelspritze","Hydranten"],
+richtig:[1,2]},
+
+{frage:"Welches Kleinlöschgerät sollte in jedem Haushalt zu finden sein?", antworten:["Kübelspritze","Feuertuch","Feuerlöscher","Feuerhandschuh"],
+richtig:[2]},
+
+{frage:"Welche Arten von Feuerwehrmitgliedern gibt es bei der Feuerwehr?", antworten:["Feuerwehrkids, aktive Mitglieder","Feuerwehrjugend, aktive Mitglieder","Bürgermeister, Mitglieder außer Dienst, Ehrenmitglieder","Mitglieder der Reserve, Mitglieder außer Dienst, Ehrenmitglieder"], richtig:[1,2]},
+
+{frage:"Wer ist für die Beschaffung und Unterbringung der Feuerwehrfahrzeuge verantwortlich?", antworten:["Die Feuerwehr","Das Land Tirol","Die Gemeinde","Die Republik Österreich"], richtig:[2]}
+
+];
+
+// ===== LOGIK =====
+
+let fragen=[], index=0, punkte=0, falsch=0, modus="", auswahl=[], beantwortet=false; let currentAnswers = [];
+
+const app=document.getElementById("app");
+const scoreEl=document.getElementById("score");
+
+function updateScore(){
+let total = fragen.length || 0;
+scoreEl.innerText = "🏆 Punkte: " + punkte + " / " + total; }
+
+function start(){
+updateScore();
+app.innerHTML=`
+<div class="card">
+<h2>Start</h2>
+<button class="button" onclick="lernen()">📘 Lernen</button> <button class="button" onclick="pruefung()">🧪 Prüfung</button> </div>`; }
+
+function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
+
+function lernen(){
+modus="lernen";
+fragen=shuffle([...alleFragen]);
+index=0; punkte=0; falsch=0;
+updateScore();
+show();
+}
+
+function pruefung(){
+modus="pruefung";
+fragen=shuffle([...alleFragen]).slice(0,10);
+index=0; punkte=0; falsch=0;
+updateScore();
+show();
+}
+
+function show(){
+auswahl=[]; beantwortet=false;
+let f=fragen[index];
+
+currentAnswers = f.antworten.map((a,i)=>({text:a, index:i})) .sort(()=>Math.random()-0.5);
+
+let progress = Math.round((index/fragen.length)*100);
+
+let html=`
+<div class="card">
+<button class="button small-btn" onclick="start()">⬅ Zurück</button> <div class="progress"><div class="progress-bar" style="width:${progress}%"></div></div>
+<h3>${f.frage}</h3>
+<p style="opacity:0.6; font-size:14px;"> ${f.richtig.length > 1 ? "Mehrere Antworten möglich" : "Eine Antwort"} </p>`;
+
+currentAnswers.forEach((a,i)=>{
+html+=`<div class="answer" onclick="toggle(${i},this)">${a.text}</div>`;
+});
+
+html+=`
+<button class="button" id="confirmBtn" onclick="check()" disabled>Bestätigen</button> <button class="button" id="nextBtn" onclick="next()" style="display:none;">➡ Weiter</button> </div>`;
+
+app.innerHTML=html;
+}
+
+function toggle(i,el){
+if(beantwortet) return;
+
+if(auswahl.includes(i)){
+auswahl=auswahl.filter(x=>x!==i);
+el.classList.remove("selected");
+}else{
+auswahl.push(i);
+el.classList.add("selected");
+}
+
+document.getElementById("confirmBtn").disabled = auswahl.length === 0; }
+
+function check(){
+beantwortet=true;
+let f=fragen[index];
+let ans=document.querySelectorAll(".answer");
+
+let korrekt =
+auswahl.length === f.richtig.length &&
+auswahl.every(i => f.richtig.includes(currentAnswers[i].index));
+
+ans.forEach((el,i)=>{
+let originalIndex = currentAnswers[i].index;
+
+if(f.richtig.includes(originalIndex)) el.classList.add("correct");
+
+if(auswahl.includes(i) && !f.richtig.includes(originalIndex)){
+    el.classList.remove("wrong");
+    void el.offsetWidth;
+    el.classList.add("wrong");
+}
+});
+
+if(korrekt){
+punkte++;
+updateScore();
+}else{
+falsch++;
+}
+
+document.getElementById("confirmBtn").style.display="none";
+document.getElementById("nextBtn").style.display="block";
+}
+
+function next(){
+index++;
+if(index<fragen.length) show();
+else ende();
+}
+
+function ende(){
+let prozent=Math.round((punkte/fragen.length)*100);
+
+let high = localStorage.getItem("highscore") || 0; if(prozent > high){
+    localStorage.setItem("highscore", prozent);
+    high = prozent;
+}
+
+app.innerHTML=`
+<div class="card">
+<h2>Ergebnis</h2>
+<p>🏆 Punkte: ${punkte} / ${fragen.length}</p> <p>❌ Falsch: ${falsch}</p>
+<p>📊 ${prozent}%</p>
+<p>🥇 Highscore: ${high}%</p>
+<button class="button" onclick="start()">🔁 Zurück</button> </div>`; }
+
+start();
+
+</script>
+
+</body>
+</html>
